@@ -1,23 +1,42 @@
--- Remove common post-processing effects if present
-    pcall(function()
-        local lighting = game:GetService("Lighting")
-        lighting.FogEnd = 1e9
-        lighting.Brightness = 2
-        lighting.ClockTime = 14
-        lighting.GlobalShadows = false
-        -- try to remove common effects objects
-        for _, v in pairs(lighting:GetChildren()) do
-            if v:IsA("Atmosphere") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") or v:IsA("Sky") then
-                pcall(function() v:Destroy() end)
-            end
-        end
-        -- try to reduce quality
-        pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-        -- remove particle-like objects in Workspace (best-effort)
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
-                pcall(function() obj.Enabled = false end)
-            end
-        end
-    end)
+--[[
+███████╗██╗   ██╗██╗     ██╗     ██████╗ ██████╗ ██╗  ██╗██╗████████╗
+██╔════╝██║   ██║██║     ██║     ██╔══██╗██╔══██╗██║  ██║██║╚══██╔══╝
+███████╗██║   ██║██║     ██║     ██║  ██║██████╔╝███████║██║   ██║   
+╚════██║██║   ██║██║     ██║     ██║  ██║██╔══██╗██╔══██║██║   ██║   
+███████║╚██████╔╝███████╗███████╗██████╔╝██║  ██║██║  ██║██║   ██║   
+╚══════╝ ╚═════╝ ╚══════╝╚══════╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝   
+]]--
+
+local Lighting = game:GetService("Lighting")
+
+-- 🌤 Làm trời sáng & xóa sương mù
+Lighting.Brightness = 2
+Lighting.ClockTime = 14
+Lighting.FogEnd = 999999
+Lighting.GlobalShadows = false
+Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+
+for _, effect in pairs(Lighting:GetChildren()) do
+	if effect:IsA("BlurEffect") or effect:IsA("ColorCorrectionEffect") or effect:IsA("BloomEffect") or effect:IsA("SunRaysEffect") then
+		effect.Enabled = false
+	end
+end
+
+-- 💡 Giảm đồ họa để mượt hơn
+pcall(function()
+	settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+	settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level01
 end)
+
+-- 🔄 Giữ FullBright liên tục
+task.spawn(function()
+	while task.wait(5) do
+		Lighting.Brightness = 2
+		Lighting.ClockTime = 14
+		Lighting.FogEnd = 999999
+		Lighting.GlobalShadows = false
+		Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+	end
+end)
+
+print("✅ Full Bright + Clear Fog + No Effects + Low Graphics Loaded!")
