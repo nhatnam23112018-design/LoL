@@ -1,0 +1,17 @@
+-- Bring all Carrot items in front of your player (2-3 studs)
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local root = char:WaitForChild("HumanoidRootPart")
+local TweenService = game:GetService("TweenService")
+
+for _, obj in pairs(workspace:GetDescendants()) do
+	if obj:IsA("BasePart") and obj.Parent and obj.Parent.Name:lower():find("carrot") then
+		-- xác định vị trí trước mặt người chơi
+		local offset = root.CFrame.LookVector * 3 -- 3 studs phía trước
+		local newPos = root.Position + offset
+		
+		-- tween object đến trước mặt
+		local tween = TweenService:Create(obj, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {CFrame = CFrame.new(newPos)})
+		tween:Play()
+	end
+end
